@@ -1,0 +1,20 @@
+{
+  "name": "esp32-wifi-security-monitor",
+  "version": "1.0.0",
+  "description": "An interactive web companion dashboard, simulator, and compiler for the ESP32 Wi-Fi Security Monitor.",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx -y http-server ./ -p 8080 -o",
+    "dev": "npx -y http-server ./ -p 8080 -o"
+  },
+  "keywords": [
+    "esp32",
+    "security",
+    "wifi",
+    "deauth",
+    "evil-twin",
+    "simulator"
+  ],
+  "author": "Antigravity Code Assistant",
+  "license": "MIT"
+}

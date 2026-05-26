@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi Shield: ESP32 Security Monitor & Simulator</title>
+    <meta name="description" content="An interactive web dashboard, simulator, and configuration tool for the ESP32 Wi-Fi Deauthentication & Evil Twin Security Monitor.">
+    <!-- Google Fonts for Cyber and Modern UI Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <!-- Upper Cyberbar (Status Overlay) -->
+    <header class="cyber-header">
+        <div class="logo-container">
+            <div class="glow-indicator" id="status-glow"></div>
+            <h1>WIFI SHIELD <span class="highlight">ESP32 SEC</span></h1>
+        </div>
+        <div class="system-meta">
+            <div class="meta-item">
+                <span class="meta-label">SYS_STATE:</span>
+                <span class="meta-value text-secure" id="state-text">ARMED &amp; SECURE</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">ACTIVE_CH:</span>
+                <span class="meta-value" id="current-channel-display">01</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">THREAT_LEVEL:</span>
+                <span class="meta-value text-secure" id="threat-level-badge">ZERO</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Grid Layout -->
+    <main class="dashboard-grid">
+
+        <!-- Column 1: Physical Hardware Sim & Controller -->
+        <section class="panel-card col-span-1" id="hardware-simulation-section">
+            <div class="card-header">
+                <h2>VIRTUAL HARDWARE SIMULATOR</h2>
+                <span class="badge">REAL-TIME REACTIVE</span>
+            </div>
+            <div class="card-body">
+                
+                <!-- Interactive Virtual Hardware Layout -->
+                <div class="hardware-sandbox">
+                    
+                    <!-- Virtual ESP32 Development Board -->
+                    <div class="virtual-esp32" id="virtual-esp32-board">
+                        <div class="esp32-header">
+                            <span class="chip-title">ESP-WROOM-32</span>
+                            <div class="board-brand">NodeMCU</div>
+                        </div>
+                        <div class="esp32-antenna"></div>
+                        <div class="esp32-silicon"></div>
+                        <!-- Blinking Hardware LEDs -->
+                        <div class="led-indicator status-green" id="esp32-status-led" title="Green Status LED (GPIO 14)"></div>
+                        <div class="led-indicator alert-red" id="esp32-alarm-led" title="Red Alarm LED (GPIO 12)"></div>
+                        <div class="pins-left">
+                            <span class="pin">3V3</span><span class="pin">GND</span><span class="pin">G15</span><span class="pin">G2</span>
+                            <span class="pin">G4</span><span class="pin">RX2</span><span class="pin">TX2</span><span class="pin">G5</span>
+                            <span class="pin">G18</span><span class="pin">G19</span><span class="pin">G21</span><span class="pin">G3</span>
+                            <span class="pin">G1</span><span class="pin">G22</span><span class="pin">G23</span>
+                        </div>
+                        <div class="pins-right">
+                            <span class="pin">VIN</span><span class="pin">GND</span><span class="pin">G13</span><span class="pin">G12</span>
+                            <span class="pin">G14</span><span class="pin">G27</span><span class="pin">G26</span><span class="pin">G25</span>
+                            <span class="pin">G33</span><span class="pin">G32</span><span class="pin">G35</span><span class="pin">G34</span>
+                            <span class="pin">VN</span><span class="pin">VP</span><span class="pin">EN</span>
+                        </div>
+                    </div>
+
+                    <!-- Virtual LCD Screen (I2C 20x4 Matrix) -->
+                    <div class="virtual-lcd-wrapper">
+                        <div class="lcd-bezel">
+                            <div class="lcd-header">I2C LCD 20x4 Matrix Display</div>
+                            <div class="lcd-screen" id="lcd-screen-display">
+                                <div class="lcd-line" id="lcd-line-1">=== WIRELESS SHIELD ===</div>
+                                <div class="lcd-line" id="lcd-line-2">SYSTEM SECURE    </div>
+                                <div class="lcd-line" id="lcd-line-3">Ch Sniffer: [01]    </div>
+                                <div class="lcd-line" id="lcd-line-4">Deauth/s: 0   CUM:0 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Simulation Trigger Panels -->
+                <div class="simulation-controls">
+                    <h3>ENVIRONMENT SIMULATOR TRIGGER</h3>
+                    <p class="section-desc">Inject virtual wireless security threats directly into the simulation model to test the response behavior of the ESP32 sniffer and alarm drivers.</p>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secure active" id="trigger-normal-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            Normal Mode
+                        </button>
+                        <button type="button" class="btn btn-warning" id="trigger-twin-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            Evil Twin AP
+                        </button>
+                        <button type="button" class="btn btn-danger" id="trigger-deauth-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                            Deauth Attack
+                        </button>
+                        <button type="button" class="btn btn-critical" id="trigger-multi-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+                            Dual Threat
+                        </button>
+                    </div>
+                    <div class="simulation-status-panel">
+                        <div class="status-indicator-pair">
+                            <span class="label">Attack Target:</span>
+                            <span class="val text-muted" id="sim-target-mac">N/A</span>
+                        </div>
+                        <div class="status-indicator-pair">
+                            <span class="label">Buzzer Siren:</span>
+                            <span class="val" id="siren-mute-status">ACTIVE (AUDIO ON)</span>
+                        </div>
+                        <button class="btn btn-outline btn-xs" id="toggle-siren-audio-btn">
+                            Mute Buzzer Audio
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Column 2: Dashboard Telemetry & Serial Console -->
+        <section class="panel-card col-span-1" id="telemetry-section">
+            <div class="card-header">
+                <h2>SPECTRUM TELEMETRY &amp; STATS</h2>
+                <span class="badge badge-pulse" id="scanner-pulse-badge">HOPPING...</span>
+            </div>
+            <div class="card-body">
+                
+                <!-- Telemetry Grid -->
+                <div class="telemetry-stat-row">
+                    <div class="stat-box">
+                        <span class="stat-label">DEAUTH PACKETS / SEC</span>
+                        <div class="stat-value text-danger" id="deauth-rate-display">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">TOTAL CAPTURED DEAUTHS</span>
+                        <div class="stat-value text-cyan" id="total-deauth-display">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">CURRENT CH HOP</span>
+                        <div class="stat-value text-warning" id="active-hop-ch-display">Ch 01</div>
+                    </div>
+                </div>
+
+                <!-- Live Attack Packet Chart -->
+                <div class="chart-container">
+                    <h3>PACKET ACTIVITY (LAST 30 SECONDS)</h3>
+                    <div class="svg-chart-wrapper">
+                        <!-- Dynamic SVG graph -->
+                        <svg id="live-packet-graph" width="100%" height="150" viewBox="0 0 600 150" preserveAspectRatio="none">
+                            <!-- Background Grid Lines -->
+                            <line x1="0" y1="37.5" x2="600" y2="37.5" stroke="#1f2d3d" stroke-dasharray="3,3" />
+                            <line x1="0" y1="75" x2="600" y2="75" stroke="#1f2d3d" stroke-dasharray="3,3" />
+                            <line x1="0" y1="112.5" x2="600" y2="112.5" stroke="#1f2d3d" stroke-dasharray="3,3" />
+                            <!-- Area under curve (Gradient fill) -->
+                            <path id="graph-area-path" d="M0,150 L600,150 Z" fill="url(#chart-gradient)" opacity="0.15" />
+                            <!-- Line plot path -->
+                            <path id="graph-line-path" d="M0,150 L600,150" fill="none" stroke="#00f3ff" stroke-width="2" />
+                            <!-- Gradients -->
+                            <defs>
+                                <linearGradient id="chart-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#00f3ff" />
+                                    <stop offset="100%" stop-color="#00f3ff" stop-opacity="0" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Live Serial Monitor Console -->
+                <div class="console-wrapper">
+                    <div class="console-header">
+                        <h3>ESP32 SERIAL TELEMETRY CONSOLE (115200 BAUD)</h3>
+                        <div class="console-actions">
+                            <input type="text" id="console-filter" placeholder="Filter logs...">
+                            <button class="btn btn-outline btn-xs" id="clear-console-btn">Clear</button>
+                            <button class="btn btn-outline btn-xs" id="export-logs-btn">Export</button>
+                        </div>
+                    </div>
+                    <div class="console-body" id="serial-terminal-logs">
+                        <div class="log-entry sys-log">[SYS] INITIALIZATION COMPLETED</div>
+                        <div class="log-entry sys-log">[SYS] GPIO pin configuration mapping successful.</div>
+                        <div class="log-entry sys-log">[SYS] 802.11 sniffer callback attached to core radio.</div>
+                        <div class="log-entry ok-log">[SYS] Scanner fully armed. Sniffing wireless packets.</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Column 1 (Row 2): Custom Firmware Generator -->
+        <section class="panel-card col-span-1" id="config-builder-section">
+            <div class="card-header">
+                <h2>FIRMWARE CUSTOM CONFIG COMPILER</h2>
+                <span class="badge">CONFIG.H BUILDER</span>
+            </div>
+            <div class="card-body">
+                <div class="config-split-layout">
+                    
+                    <!-- Config inputs form -->
+                    <form class="config-inputs-form" id="config-settings-form" onsubmit="event.preventDefault();">
+                        <h3>SYSTEM PARAMETERS</h3>
+                        
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="cfg-sda-pin">I2C SDA GPIO Pin</label>
+                                <input type="number" id="cfg-sda-pin" value="21" min="0" max="39">
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-scl-pin">I2C SCL GPIO Pin</label>
+                                <input type="number" id="cfg-scl-pin" value="22" min="0" max="39">
+                            </div>
+                        </div>
+
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="cfg-buzzer-pin">Buzzer GPIO Pin</label>
+                                <input type="number" id="cfg-buzzer-pin" value="13" min="0" max="39">
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-led-pin">Red Alarm LED Pin</label>
+                                <input type="number" id="cfg-led-pin" value="12" min="0" max="39">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cfg-deauth-threshold">Deauth Attack Threshold (frames/sec)</label>
+                            <input type="number" id="cfg-deauth-threshold" value="5" min="1" max="100">
+                        </div>
+
+                        <h3>WHITELISTED HOMENETWORK DETAILS</h3>
+                        <div class="form-group">
+                            <label for="cfg-whitelist-ssid">Trusted Access Point SSID</label>
+                            <input type="text" id="cfg-whitelist-ssid" value="MyHomeNetwork_5G">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cfg-whitelist-bssid">Authentic BSSID (MAC Address)</label>
+                            <input type="text" id="cfg-whitelist-bssid" value="AA:BB:CC:11:22:33" placeholder="AA:BB:CC:DD:EE:FF">
+                            <small class="form-tip">Leave blank to whitelist by SSID name only.</small>
+                        </div>
+                        
+                        <button type="button" class="btn btn-cyan btn-full" id="compile-config-btn">Compile config.h</button>
+                    </form>
+
+                    <!-- Rendered C++ config code -->
+                    <div class="code-output-container">
+                        <div class="code-header">
+                            <span>config.h</span>
+                            <button class="btn btn-outline btn-xs" id="copy-config-btn">Copy Code</button>
+                        </div>
+                        <pre class="code-pre" id="config-code-preview"><code>// Click "Compile config.h" to generate code.</code></pre>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Column 2 (Row 2): Interactive Hardware Wiring Guide -->
+        <section class="panel-card col-span-1" id="circuit-guide-section">
+            <div class="card-header">
+                <h2>INTERACTIVE CIRCUIT SCHEMATIC GUIDE</h2>
+                <span class="badge">HOVER WIRES TO HIGHLIGHT</span>
+            </div>
+            <div class="card-body">
+                <p class="section-desc">Move your cursor over the components or connections in the circuit diagram below to view pinning, wiring instructions, and configuration data.</p>
+                
+                <!-- Interactive Circuit SVG -->
+                <div class="circuit-canvas">
+                    <svg id="interactive-circuit-svg" viewBox="0 0 600 350" width="100%" height="100%">
+                        <!-- Grid Background -->
+                        <defs>
+                            <pattern id="circuit-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <circle cx="1" cy="1" r="1" fill="#141a22" />
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#circuit-grid)" rx="6" />
+
+                        <!-- Breadboard Background (Simple representation) -->
+                        <rect x="50" y="80" width="500" height="210" fill="#1b232e" rx="4" stroke="#253242" stroke-width="1.5" />
+                        
+                        <!-- Connecting Wires (Will be highlighted by JS) -->
+                        <!-- Ground Wire (Black) -->
+                        <path id="wire-gnd" class="circuit-wire wire-black" d="M 190,205 L 190,310 L 490,310 L 490,260" />
+                        <!-- 5V VCC Wire (Red) -->
+                        <path id="wire-vcc" class="circuit-wire wire-red" d="M 160,205 L 160,295 L 430,295 L 430,260" />
+                        <!-- I2C SDA Wire (Yellow) -->
+                        <path id="wire-sda" class="circuit-wire wire-yellow" d="M 230,205 L 230,260 L 370,260 L 370,230" />
+                        <!-- I2C SCL Wire (Orange) -->
+                        <path id="wire-scl" class="circuit-wire wire-orange" d="M 240,205 L 240,240 L 340,240 L 340,230" />
+                        <!-- Buzzer Pin G13 (Blue) -->
+                        <path id="wire-buzzer" class="circuit-wire wire-blue" d="M 180,115 L 180,45 L 85,45 L 85,110" />
+                        <!-- Alert LED Pin G12 (Red-glow) -->
+                        <path id="wire-led-alert" class="circuit-wire wire-purple" d="M 190,115 L 190,65 L 470,65 L 470,110" />
+                        <!-- Status LED Pin G14 (Green-glow) -->
+                        <path id="wire-led-status" class="circuit-wire wire-green" d="M 200,115 L 200,55 L 520,55 L 520,110" />
+
+                        <!-- Hardware Elements -->
+                        
+                        <!-- 1. ESP32 NodeMCU Module -->
+                        <g id="comp-esp32" class="circuit-node">
+                            <rect x="150" y="110" width="100" height="100" fill="#0d1117" rx="3" stroke="#00f3ff" stroke-width="2" />
+                            <rect x="160" y="110" width="80" height="20" fill="#21262d" />
+                            <text x="200" y="123" fill="#8b949e" font-size="10" font-family="'Orbitron', sans-serif" text-anchor="middle">ESP32</text>
+                            
+                            <!-- GPIO Connection Points -->
+                            <circle cx="160" cy="205" r="4" fill="#ff7b72" title="VIN Pin" />
+                            <circle cx="190" cy="205" r="4" fill="#8b949e" title="GND Pin" />
+                            <circle cx="230" cy="205" r="4" fill="#d29922" title="GPIO 21 (SDA)" />
+                            <circle cx="240" cy="205" r="4" fill="#d29922" title="GPIO 22 (SCL)" />
+                            
+                            <circle cx="180" cy="115" r="4" fill="#58a6ff" title="GPIO 13" />
+                            <circle cx="190" cy="115" r="4" fill="#bc8cff" title="GPIO 12" />
+                            <circle cx="200" cy="115" r="4" fill="#3fb950" title="GPIO 14" />
+                        </g>
+
+                        <!-- 2. I2C LCD Character Board -->
+                        <g id="comp-lcd" class="circuit-node">
+                            <rect x="310" y="130" width="150" height="100" fill="#1b4d3e" rx="4" stroke="#3fb950" stroke-width="1.5" />
+                            <rect x="320" y="140" width="130" height="60" fill="#000" rx="2" />
+                            <text x="385" y="175" fill="#3fb950" font-size="12" font-family="'Orbitron', sans-serif" text-anchor="middle">LCD Screen</text>
+                            <!-- I2C Backpack module on back -->
+                            <rect x="350" y="215" width="70" height="20" fill="#090d16" stroke="#d29922" stroke-width="1" />
+                            <!-- Pin connectors -->
+                            <circle cx="370" cy="230" r="3" fill="#d29922" />
+                            <circle cx="340" cy="230" r="3" fill="#d29922" />
+                            <circle cx="430" cy="260" r="3" fill="#ff7b72" />
+                            <circle cx="490" cy="260" r="3" fill="#8b949e" />
+                            <text x="385" y="248" fill="#8b949e" font-size="8" font-family="sans-serif" text-anchor="middle">I2C Pins</text>
+                        </g>
+
+                        <!-- 3. Piezo Buzzer -->
+                        <g id="comp-buzzer" class="circuit-node">
+                            <circle cx="85" cy="140" r="25" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" />
+                            <circle cx="85" cy="140" r="8" fill="#0d1117" />
+                            <text x="85" y="180" fill="#8b949e" font-size="9" font-family="sans-serif" text-anchor="middle">Piezo Buzzer</text>
+                            <!-- Plus sign -->
+                            <text x="68" y="130" fill="#58a6ff" font-size="12" font-weight="bold">+</text>
+                        </g>
+
+                        <!-- 4. Alert & Status LEDs with resistors -->
+                        <g id="comp-leds" class="circuit-node">
+                            <!-- Alert Red LED -->
+                            <path d="M 470,110 L 460,135 L 480,135 Z" fill="#ff7b72" stroke="#ff5f52" stroke-width="1" />
+                            <circle cx="470" cy="135" r="3" fill="#ff7b72" />
+                            <rect x="465" y="145" width="10" height="15" fill="#30363d" />
+                            <text x="470" y="175" fill="#ff7b72" font-size="8" font-family="sans-serif" text-anchor="middle">ALARM LED</text>
+
+                            <!-- Status Green LED -->
+                            <path d="M 520,110 L 510,135 L 530,135 Z" fill="#56d364" stroke="#3fb950" stroke-width="1" />
+                            <circle cx="520" cy="135" r="3" fill="#56d364" />
+                            <rect x="515" y="145" width="10" height="15" fill="#30363d" />
+                            <text x="520" y="175" fill="#56d364" font-size="8" font-family="sans-serif" text-anchor="middle">STATUS LED</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Live Schematic Info Card -->
+                <div class="circuit-details-panel" id="circuit-wire-info-card">
+                    <h4>CIRCUIT DIAGRAM EXPLORER</h4>
+                    <p id="circuit-wire-info-text">Hover over any wire path, LED, or component module above to display detailed wiring and connection details.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Section: Detailed Educational Resource Center -->
+    <section class="panel-card container-full" id="educational-hub">
+        <div class="card-header">
+            <h2>WIRELESS THREAT ANALYSIS &amp; PROTOCOL LIBRARY</h2>
+            <span class="badge badge-purple">SECURITY EDUCATION</span>
+        </div>
+        <div class="card-body">
+            
+            <div class="educational-layout">
+                
+                <article class="educational-topic">
+                    <div class="topic-header">
+                        <div class="icon-sphere danger"></div>
+                        <h3>Wi-Fi Deauthentication Storms (DoS)</h3>
+                    </div>
+                    <div class="topic-body">
+                        <p>A **Deauthentication Attack** is a form of Denial-of-Service (DoS) that targets communication between a client device (laptop, phone) and a wireless Access Point (AP).</p>
+                        <p>Under the standard **802.11 Wi-Fi protocol**, management frames (such as connection requests, disassociations, and deauthentications) were designed to be broadcast in plaintext without encryption or signatures. An attacker can craft a spoofed deauthentication frame with a transmitter address mimicking your home router, and send it to the client device. Since the client thinks the packet is genuine, it instantly breaks the Wi-Fi connection.</p>
+                        
+                        <div class="educational-alert warning">
+                            <strong>Standard Loophole:</strong> The 802.11w amendment introduced PMF (Protected Management Frames), which encrypts these management packets. However, many older IoT devices, legacy printers, and routers do not support PMF, leaving them vulnerable to simple deauth floods!
+                        </div>
+
+                        <h4>How our ESP32 Sniffer Detects It:</h4>
+                        <p>The ESP32 is set into **promiscuous mode**, meaning its radio antenna listens to all raw 802.11 packets floating in the air on a specific channel, rather than parsing only those directed to its own MAC address. The firmware searches for frames where the Type is `0x00` (Management) and Subtype is `0x0C` (Deauthentication). If the rate of these specific packets surges past our `DEAUTH_ALERT_THRESHOLD` (5/sec), a localized denial-of-service attack is confirmed and flagged.</p>
+                    </div>
+                </article>
+
+                <article class="educational-topic">
+                    <div class="topic-header">
+                        <div class="icon-sphere warning"></div>
+                        <h3>Evil Twin Access Point Cloning</h3>
+                    </div>
+                    <div class="topic-body">
+                        <p>An **Evil Twin Attack** is a rogue wireless Access Point (AP) that has been configured to broadcast the exact same network name (SSID) as a legitimate, trusted network in the vicinity.</p>
+                        <p>Wireless devices automatically store whitelists of previously joined Wi-Fi networks and attempt to connect to the strongest signal matching a saved SSID. An attacker can set up a high-power rogue access point right outside a building with a cloned SSID. Once your phone or laptop connects, the attacker can sniff all your unencrypted HTTP web traffic, run redirect phishing campaigns, or harvest credentials.</p>
+
+                        <h4>How our ESP32 Scanner Detects It:</h4>
+                        <p>At regular intervals, the ESP32 pauses packet sniffing and performs an **Active Network Scan** across the entire 2.4GHz spectrum. The firmware compiles a database of all broadcasting access points and tests them against custom heuristic security audits:</p>
+                        
+                        <ul class="styled-list">
+                            <li><strong>MAC Address Audits:</strong> If a scanned access point's SSID matches our whitelisted home SSID but its MAC Address (BSSID) does not match the true router's MAC, it flags an Evil Twin.</li>
+                            <li><strong>Security Downgrades:</strong> If your home Wi-Fi is configured as WPA2-PSK (Encrypted), but a scanned AP with the exact same SSID is Open (no password) or using weak WEP encryption, it is instantly identified as a rogue access point.</li>
+                        </ul>
+                    </div>
+                </article>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer System Specs -->
+    <footer class="cyber-footer">
+        <p>&copy; 2026 Wi-Fi Shield Security Project. Developed for advanced security scanning and simulation.</p>
+        <p>Firmware API Version: ESP32-WIFI-SNIFF-v2.1</p>
+    </footer>
+
+    <!-- Tone generator synthesizer logic for buzzer sirens -->
+    <script src="app.js"></script>
+</body>
+</html>

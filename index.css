@@ -1,0 +1,1080 @@
+/* 
+ * ESP32 Wi-Fi Security Monitor - Cyberpunk Theme Design System
+ * Written in standard Vanilla CSS
+ */
+
+/* ==========================================================================
+   1. GLOBAL STYLES & VARIABLE CONSTANTS
+   ========================================================================== */
+:root {
+    /* Color Palette */
+    --color-bg-base: #060913;
+    --color-bg-panel: rgba(13, 20, 35, 0.7);
+    --color-bg-darker: #080c16;
+    
+    --color-cyan: #00f3ff;
+    --color-cyan-glow: rgba(0, 243, 255, 0.4);
+    
+    --color-green: #39ff14;
+    --color-green-glow: rgba(57, 255, 20, 0.3);
+    
+    --color-red: #ff0055;
+    --color-red-glow: rgba(255, 0, 85, 0.45);
+    
+    --color-gold: #ffaa00;
+    --color-gold-glow: rgba(255, 170, 0, 0.3);
+    
+    --color-purple: #bd00ff;
+    
+    --color-text-primary: #e2e8f0;
+    --color-text-muted: #64748b;
+    --color-border: #1e293b;
+    --color-border-glow: rgba(0, 243, 255, 0.15);
+
+    /* Fonts */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-cyber: 'Orbitron', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Transitions */
+    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Resets */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.04) 0%, transparent 40%),
+        linear-gradient(rgba(18, 24, 38, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(18, 24, 38, 0.4) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    padding-bottom: 2rem;
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--color-bg-darker);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-cyan);
+}
+
+/* ==========================================================================
+   2. HEADER & HEADER PANEL OVERLAY
+   ========================================================================== */
+.cyber-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: rgba(6, 9, 19, 0.85);
+    border-bottom: 2px solid var(--color-border);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.glow-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-green);
+    box-shadow: 0 0 12px var(--color-green-glow);
+    transition: var(--transition-fast);
+}
+
+.glow-indicator.alarm-pulsing {
+    background-color: var(--color-red);
+    box-shadow: 0 0 15px var(--color-red);
+    animation: pulse-red 0.5s infinite alternate;
+}
+
+.glow-indicator.warning-pulsing {
+    background-color: var(--color-gold);
+    box-shadow: 0 0 12px var(--color-gold);
+    animation: pulse-gold 0.8s infinite alternate;
+}
+
+.cyber-header h1 {
+    font-family: var(--font-cyber);
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--color-text-primary);
+}
+
+.cyber-header h1 .highlight {
+    color: var(--color-cyan);
+    text-shadow: 0 0 8px var(--color-cyan-glow);
+}
+
+.system-meta {
+    display: flex;
+    gap: 2rem;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.meta-label {
+    font-size: 0.65rem;
+    font-family: var(--font-cyber);
+    color: var(--color-text-muted);
+    letter-spacing: 1px;
+}
+
+.meta-value {
+    font-size: 0.95rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--color-cyan);
+}
+
+/* ==========================================================================
+   3. REUSABLE DASHBOARD LAYOUT UNITS
+   ========================================================================== */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.panel-card {
+    background-color: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border-glow), transparent);
+}
+
+.panel-card:hover {
+    border-color: var(--color-border-glow);
+    box-shadow: 0 8px 32px rgba(0, 243, 255, 0.05);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+    background-color: rgba(6, 9, 19, 0.3);
+}
+
+.card-header h2 {
+    font-family: var(--font-cyber);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--color-cyan);
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Badges */
+.badge {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-family: var(--font-cyber);
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 1px;
+}
+
+.badge-pulse {
+    border-color: var(--color-cyan-glow);
+    color: var(--color-cyan);
+    animation: border-glow-pulse 1.5s infinite alternate;
+}
+
+.container-full {
+    grid-column: span 2;
+}
+
+@media (max-width: 1024px) {
+    .container-full {
+        grid-column: span 1;
+    }
+}
+
+/* Utility Colors */
+.text-secure { color: var(--color-green) !important; text-shadow: 0 0 6px var(--color-green-glow); }
+.text-warning { color: var(--color-gold) !important; text-shadow: 0 0 6px var(--color-gold-glow); }
+.text-danger { color: var(--color-red) !important; text-shadow: 0 0 8px var(--color-red-glow); }
+.text-cyan { color: var(--color-cyan) !important; text-shadow: 0 0 6px var(--color-cyan-glow); }
+.text-muted { color: var(--color-text-muted); }
+
+/* ==========================================================================
+   4. HARDWARE SIMULATOR COMPONENT (ESP32 & LCD)
+   ========================================================================== */
+.hardware-sandbox {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem;
+    background-color: var(--color-bg-darker);
+    border-radius: 6px;
+    border: 1px dashed var(--color-border);
+    margin-bottom: 1.5rem;
+}
+
+/* Virtual ESP32 module */
+.virtual-esp32 {
+    width: 140px;
+    height: 190px;
+    background: #1e222b;
+    border: 2.5px solid #2d333f;
+    border-radius: 4px;
+    position: relative;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.esp32-antenna {
+    width: 100px;
+    height: 25px;
+    background: #000;
+    margin: 5px auto 0 auto;
+    border-radius: 2px;
+    background-image: repeating-linear-gradient(45deg, #151515, #151515 5px, #2a2a2a 5px, #2a2a2a 10px);
+}
+
+.esp32-header {
+    text-align: center;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chip-title {
+    font-size: 7px;
+    font-family: var(--font-cyber);
+    color: #8b949e;
+}
+
+.board-brand {
+    font-size: 9px;
+    font-family: var(--font-cyber);
+    font-weight: bold;
+    color: var(--color-text-primary);
+    margin-top: 2px;
+}
+
+.esp32-silicon {
+    width: 70px;
+    height: 70px;
+    background: #2d3139;
+    border: 1px solid #484f58;
+    margin: 15px auto 0 auto;
+    border-radius: 3px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    background-image: radial-gradient(#3a404c 20%, transparent 20%), radial-gradient(#3a404c 20%, transparent 20%);
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
+}
+
+/* Blinking LEDs on ESP32 */
+.led-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    background: #3a3f4c;
+}
+
+.led-indicator.status-green {
+    top: 40px;
+    right: 25px;
+}
+
+.led-indicator.status-green.active {
+    background: var(--color-green);
+    box-shadow: 0 0 8px var(--color-green);
+}
+
+.led-indicator.status-green.blinking {
+    animation: blink-green 0.3s infinite alternate;
+}
+
+.led-indicator.alert-red {
+    top: 40px;
+    left: 25px;
+}
+
+.led-indicator.alert-red.active {
+    background: var(--color-red);
+    box-shadow: 0 0 8px var(--color-red);
+}
+
+.led-indicator.alert-red.blinking {
+    animation: blink-red 0.15s infinite alternate;
+}
+
+.pins-left, .pins-right {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 10px;
+    gap: 3.5px;
+}
+
+.pins-left { left: -6px; }
+.pins-right { right: -6px; }
+
+.pin {
+    width: 8px;
+    height: 4.5px;
+    background: #768390;
+    border-radius: 1px;
+    font-size: 0px; /* Hide text label on mini rendering */
+}
+
+/* Virtual 20x4 LCD */
+.virtual-lcd-wrapper {
+    flex: 1;
+    min-width: 240px;
+    max-width: 320px;
+}
+
+.lcd-bezel {
+    background: #0d1117;
+    border: 4px solid #1f242e;
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: inset 0 0 8px #000, 0 6px 16px rgba(0,0,0,0.5);
+}
+
+.lcd-header {
+    font-size: 8px;
+    color: var(--color-text-muted);
+    font-family: var(--font-cyber);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lcd-screen {
+    background: #020c08;
+    border: 3px solid #000;
+    padding: 8px;
+    border-radius: 2px;
+    height: 105px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Liquid Crystal Backlight Glow and scanline effect */
+.lcd-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(16, 230, 100, 0.1) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.lcd-screen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 3px, 6px 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.lcd-line {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: 700;
+    color: #40f287;
+    text-shadow: 0 0 3px rgba(64, 242, 135, 0.8);
+    white-space: pre;
+    z-index: 1;
+}
+
+/* Active alarm state override on LCD Display */
+.lcd-screen.danger-alert {
+    background: #140206;
+}
+.lcd-screen.danger-alert::before {
+    background: radial-gradient(circle, rgba(242, 64, 64, 0.18) 0%, transparent 80%);
+}
+.lcd-screen.danger-alert .lcd-line {
+    color: #f2405d;
+    text-shadow: 0 0 4px rgba(242, 64, 93, 0.9);
+}
+
+.lcd-screen.warning-alert {
+    background: #120902;
+}
+.lcd-screen.warning-alert::before {
+    background: radial-gradient(circle, rgba(242, 180, 64, 0.15) 0%, transparent 80%);
+}
+.lcd-screen.warning-alert .lcd-line {
+    color: #f2b440;
+    text-shadow: 0 0 3px rgba(242, 180, 64, 0.8);
+}
+
+/* Simulator controls buttons layout */
+.simulation-controls {
+    border-top: 1px solid var(--color-border);
+    padding-top: 1.25rem;
+}
+
+.simulation-controls h3 {
+    font-family: var(--font-cyber);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-cyan);
+    margin-bottom: 0.5rem;
+}
+
+.section-desc {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.25rem;
+}
+
+.btn-group {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (max-width: 640px) {
+    .btn-group {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.btn {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    font-family: var(--font-cyber);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.6rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    letter-spacing: 0.5px;
+    transition: var(--transition-fast);
+}
+
+.btn:hover {
+    border-color: var(--color-cyan-glow);
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.btn.active {
+    background: var(--color-cyan-glow);
+    border-color: var(--color-cyan);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+}
+
+.btn-secure.active {
+    background: rgba(57, 255, 20, 0.15);
+    border-color: var(--color-green);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.1);
+}
+
+.btn-warning.active {
+    background: rgba(255, 170, 0, 0.15);
+    border-color: var(--color-gold);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.1);
+}
+
+.btn-danger.active {
+    background: rgba(255, 0, 85, 0.15);
+    border-color: var(--color-red);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.15);
+}
+
+.btn-critical.active {
+    background: rgba(189, 0, 255, 0.15);
+    border-color: var(--color-purple);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(189, 0, 255, 0.15);
+    animation: boundary-alert 0.8s infinite alternate;
+}
+
+.btn-outline {
+    background: transparent;
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+}
+.btn-outline:hover {
+    color: var(--color-cyan);
+    border-color: var(--color-cyan);
+}
+
+.btn-cyan {
+    background: var(--color-cyan);
+    border-color: var(--color-cyan);
+    color: var(--color-bg-base);
+}
+.btn-cyan:hover {
+    background: #00d2dd;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.btn-xs {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.6rem;
+}
+
+.simulation-status-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-bg-darker);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.status-indicator-pair {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-indicator-pair .label {
+    font-size: 0.6rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-cyber);
+}
+
+.status-indicator-pair .val {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   5. TELEMETRY CHARTS & SCROLLING LOGS
+   ========================================================================== */
+.telemetry-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-box {
+    background-color: var(--color-bg-darker);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.55rem;
+    font-family: var(--font-cyber);
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-family: var(--font-cyber);
+    font-weight: 900;
+}
+
+.chart-container {
+    background-color: var(--color-bg-darker);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-container h3 {
+    font-size: 0.65rem;
+    font-family: var(--font-cyber);
+    color: var(--color-text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.svg-chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 150px;
+}
+
+/* Scrolling Terminal Console */
+.console-wrapper {
+    background-color: #05080f;
+    border: 1.5px solid var(--color-border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.console-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background-color: rgba(6, 9, 19, 0.8);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.console-header h3 {
+    font-size: 0.65rem;
+    font-family: var(--font-cyber);
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+}
+
+.console-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.console-actions input {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid var(--color-border);
+    font-size: 0.6rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    outline: none;
+    width: 110px;
+}
+.console-actions input:focus {
+    border-color: var(--color-cyan);
+}
+
+.console-body {
+    height: 160px;
+    overflow-y: auto;
+    padding: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.log-entry {
+    white-space: pre-wrap;
+    line-height: 1.3;
+}
+
+.sys-log { color: #8b949e; }
+.ok-log { color: var(--color-green); }
+.warn-log { color: var(--color-gold); }
+.danger-log { color: var(--color-red); }
+.ap-log { color: var(--color-cyan); }
+
+/* ==========================================================================
+   6. CUSTOM FIRMWARE GENERATOR
+   ========================================================================== */
+.config-split-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .config-split-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.config-inputs-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.config-inputs-form h3 {
+    font-size: 0.65rem;
+    font-family: var(--font-cyber);
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 4px;
+    letter-spacing: 0.5px;
+    margin-top: 5px;
+}
+
+.form-group-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.form-group label {
+    font-size: 0.65rem;
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+}
+
+.form-group input {
+    background: var(--color-bg-darker);
+    border: 1px solid var(--color-border);
+    color: #fff;
+    padding: 0.45rem 0.6rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+.form-group input:focus {
+    border-color: var(--color-cyan);
+    box-shadow: 0 0 8px var(--color-cyan-glow);
+}
+
+.form-tip {
+    font-size: 0.6rem;
+    color: var(--color-text-muted);
+    margin-top: 1px;
+}
+
+.code-output-container {
+    background: #03060c;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    max-height: 380px;
+    overflow: hidden;
+}
+
+.code-header {
+    background: rgba(6, 9, 19, 0.6);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+.code-pre {
+    flex: 1;
+    overflow: auto;
+    padding: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: #a5d6ff;
+}
+
+/* ==========================================================================
+   7. INTERACTIVE SCHEMATIC GUIDE
+   ========================================================================== */
+.circuit-canvas {
+    background-color: #0b0f19;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    overflow: hidden;
+    height: 250px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Wiring paths animation */
+.circuit-wire {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.35;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.circuit-wire:hover, .circuit-wire.highlighted {
+    opacity: 1;
+    stroke-width: 4;
+}
+
+.wire-black { stroke: #000000; }
+.wire-red { stroke: #ea4335; }
+.wire-yellow { stroke: #fbbc05; }
+.wire-orange { stroke: #ff6d01; }
+.wire-blue { stroke: #4285f4; }
+.wire-purple { stroke: #bd00ff; }
+.wire-green { stroke: #34a853; }
+
+.circuit-wire.highlighted {
+    animation: wire-flow 1.5s infinite linear;
+    stroke-dasharray: 8, 4;
+}
+
+.circuit-node {
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.circuit-node:hover {
+    filter: brightness(1.2);
+}
+
+.circuit-details-panel {
+    background-color: var(--color-bg-darker);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+}
+
+.circuit-details-panel h4 {
+    font-size: 0.7rem;
+    font-family: var(--font-cyber);
+    color: var(--color-cyan);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.5px;
+}
+
+.circuit-details-panel p {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   8. EDUCATIONAL HUB & DOCUMENTATION
+   ========================================================================== */
+.educational-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .educational-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.educational-topic {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.topic-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.icon-sphere {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+.icon-sphere.danger { background: var(--color-red); box-shadow: 0 0 10px var(--color-red-glow); }
+.icon-sphere.warning { background: var(--color-gold); box-shadow: 0 0 10px var(--color-gold-glow); }
+
+.topic-header h3 {
+    font-family: var(--font-cyber);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.topic-body {
+    font-size: 0.85rem;
+    color: var(--color-text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.topic-body p strong {
+    color: var(--color-cyan);
+}
+
+.educational-alert {
+    border-left: 3px solid;
+    padding: 0.6rem 0.85rem;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.8rem;
+}
+
+.educational-alert.warning {
+    background-color: rgba(255, 170, 0, 0.05);
+    border-color: var(--color-gold);
+    color: #e2c074;
+}
+
+.styled-list {
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.styled-list li {
+    position: relative;
+    padding-left: 1.2rem;
+}
+
+.styled-list li::before {
+    content: ">>";
+    position: absolute;
+    left: 0;
+    color: var(--color-cyan);
+    font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   9. FOOTER & ALIGNMENT STRUCTURES
+   ========================================================================== */
+.cyber-footer {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 2rem auto 0 auto;
+    padding: 1.5rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+/* ==========================================================================
+   10. KEYFRAME ANIMATIONS
+   ========================================================================== */
+@keyframes pulse-red {
+    from { box-shadow: 0 0 4px var(--color-red-glow); }
+    to { box-shadow: 0 0 16px var(--color-red); }
+}
+
+@keyframes pulse-gold {
+    from { box-shadow: 0 0 4px var(--color-gold-glow); }
+    to { box-shadow: 0 0 12px var(--color-gold); }
+}
+
+@keyframes border-glow-pulse {
+    from { border-color: rgba(0, 243, 255, 0.15); box-shadow: 0 0 2px rgba(0, 243, 255, 0.05); }
+    to { border-color: rgba(0, 243, 255, 0.5); box-shadow: 0 0 10px rgba(0, 243, 255, 0.15); }
+}
+
+@keyframes blink-green {
+    from { background-color: rgba(57, 255, 20, 0.1); box-shadow: 0 0 0px transparent; }
+    to { background-color: var(--color-green); box-shadow: 0 0 10px var(--color-green); }
+}
+
+@keyframes blink-red {
+    from { background-color: rgba(255, 0, 85, 0.1); box-shadow: 0 0 0px transparent; }
+    to { background-color: var(--color-red); box-shadow: 0 0 12px var(--color-red); }
+}
+
+@keyframes wire-flow {
+    from { stroke-dashoffset: 24; }
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes boundary-alert {
+    from { border-color: var(--color-purple); }
+    to { border-color: var(--color-red); box-shadow: 0 0 10px rgba(255, 0, 85, 0.2); }
+}
